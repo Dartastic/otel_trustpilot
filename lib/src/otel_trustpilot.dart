@@ -1,15 +1,16 @@
-// Licensed under the Dartastic Pro Software License Agreement.
+// Licensed under the Apache License, Version 2.0
 // Copyright 2025-2026 Mindful Software LLC d/b/a Dartastic.io, All rights reserved.
 
-import 'package:dartastic_opentelemetry/dartastic_opentelemetry.dart';
+import 'package:dartastic_opentelemetry_api/dartastic_opentelemetry_api.dart';
 
 import 'otel_trustpilot_suppression.dart';
 
 const _tracerName = 'dartastic_otel_libs_trustpilot';
 
-Tracer _tracer() => OTel.tracerProvider().getTracer(_tracerName);
+APITracer _tracer() => OTelAPI.tracerProvider().getTracer(_tracerName);
 
 class TrustpilotResult {
+  /// Creates a result.
   const TrustpilotResult({
     this.businessUnitId,
     this.locationId,
@@ -84,8 +85,13 @@ class TrustpilotResult {
   final int? statusCode;
 }
 
+/// What a traced call returned: the value for the caller plus fields
+/// recorded on the span.
 class TrustpilotCallResult<T> {
+  /// Creates a call result.
   const TrustpilotCallResult({required this.value, this.result});
+
+  /// The value returned to the caller.
   final T value;
   final TrustpilotResult? result;
 }
@@ -114,92 +120,92 @@ Future<T> tracedTrustpilot<T>({
   final span = _tracer().startSpan(
     'trustpilot $operation',
     kind: SpanKind.client,
-    attributes: OTel.attributesFromMap(m),
+    attributes: OTelAPI.attributesFromMap(m),
   );
   try {
     final r = await invoke();
     if (r.result != null) {
       final extras = <Attribute<Object>>[];
       if (r.result!.businessUnitId != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'trustpilot.business_unit.id',
           r.result!.businessUnitId!,
         ));
       }
       if (r.result!.locationId != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'trustpilot.location.id',
           r.result!.locationId!,
         ));
       }
       if (r.result!.entityKind != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'trustpilot.entity.kind',
           r.result!.entityKind!,
         ));
       }
       if (r.result!.entityId != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'trustpilot.entity.id',
           r.result!.entityId!,
         ));
       }
       if (r.result!.reviewId != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'trustpilot.review.id',
           r.result!.reviewId!,
         ));
       }
       if (r.result!.reviewStars != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'trustpilot.review.stars',
           r.result!.reviewStars!,
         ));
       }
       if (r.result!.reviewLanguage != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'trustpilot.review.language',
           r.result!.reviewLanguage!,
         ));
       }
       if (r.result!.reviewSource != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'trustpilot.review.source',
           r.result!.reviewSource!,
         ));
       }
       if (r.result!.reviewVerified != null) {
-        extras.add(OTel.attributeBool(
+        extras.add(OTelAPI.attributeBool(
           'trustpilot.review.verified',
           r.result!.reviewVerified!,
         ));
       }
       if (r.result!.reviewFlagged != null) {
-        extras.add(OTel.attributeBool(
+        extras.add(OTelAPI.attributeBool(
           'trustpilot.review.flagged',
           r.result!.reviewFlagged!,
         ));
       }
       if (r.result!.reviewReported != null) {
-        extras.add(OTel.attributeBool(
+        extras.add(OTelAPI.attributeBool(
           'trustpilot.review.reported',
           r.result!.reviewReported!,
         ));
       }
       if (r.result!.replyStatus != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'trustpilot.reply.status',
           r.result!.replyStatus!,
         ));
       }
       if (r.result!.invitationId != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'trustpilot.invitation.id',
           r.result!.invitationId!,
         ));
       }
       if (r.result!.invitationStatus != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'trustpilot.invitation.status',
           r.result!.invitationStatus!,
         ));
@@ -212,19 +218,19 @@ Future<T> tracedTrustpilot<T>({
         }
       }
       if (r.result!.invitationsSent != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'trustpilot.invitations.sent',
           r.result!.invitationsSent!,
         ));
       }
       if (r.result!.trustScore != null) {
-        extras.add(OTel.attributeDouble(
+        extras.add(OTelAPI.attributeDouble(
           'trustpilot.trust_score',
           r.result!.trustScore!,
         ));
       }
       if (r.result!.statusCode != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'http.response.status_code',
           r.result!.statusCode!,
         ));
@@ -235,13 +241,13 @@ Future<T> tracedTrustpilot<T>({
           );
         }
       }
-      if (extras.isNotEmpty) span.addAttributes(OTel.attributes(extras));
+      if (extras.isNotEmpty) span.addAttributes(OTelAPI.attributes(extras));
     }
     return r.value;
   } catch (e, st) {
-    span.addAttributes(OTel.attributes([
-      OTel.attributeString(
-        ErrorResource.errorType.key,
+    span.addAttributes(OTelAPI.attributes([
+      OTelAPI.attributeString(
+        ErrorAttributes.errorType.key,
         e.runtimeType.toString(),
       ),
     ]));
